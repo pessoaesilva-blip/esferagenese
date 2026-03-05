@@ -1,1 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Entrada - Universo</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      font-family: 'Arial', sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .welcome-text {
+      font-size: 1.2em; /* menor para caber dentro da esfera */
+      margin-bottom: 15px;
+      animation: fadeGlow 4s ease-in-out infinite alternate;
+    }
+    .link-genese {
+      color: #88ccff;
+      font-size: 1.1em;
+      text-decoration: none;
+      border: 2px solid #88ccff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: all 0.5s ease;
+    }
+    .link-genese:hover {
+      background: #88ccff;
+      color: black;
+      box-shadow: 0 0 20px #88ccff;
+    }
+    @keyframes fadeGlow {
+      from {
+        opacity: 0.4;
+        text-shadow: 0 0 10px #88ccff, 0 0 20px #88ccff;
+      }
+      to {
+        opacity: 1;
+        text-shadow: 0 0 20px #ffffff, 0 0 40px #88ccff, 0 0 60px #88ccff;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="welcome-text">Bem-vindo ao Universo</div>
+    <a href="genese.html" class="link-genese">Entrar na Gênese</a>
+  </div>
 
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 4000);
+    const renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Fundo estelar
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 2500;
+    const starVertices = [];
+    for (let i = 0; i < starCount; i++) {
+      const x = (Math.random() - 0.5) * 2000;
+      const y = (Math.random() - 0.5) * 2000;
+      const z = (Math.random() - 0.5) * 2000;
+      starVertices.push(x, y, z);
+    }
+    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+    const starMaterial = new THREE.PointsMaterial({color: 0xffffff, size: 1.2});
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+
+    // Esfera verde opaca
+    const sphereGeometry = new THREE.SphereGeometry(2, 64, 64);
+    const sphereMaterial = new THREE.MeshPhongMaterial({
+      color: 0x228B22, // verde
+      shininess: 80
+    });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    scene.add(sphere);
+
+    // Aura azul pulsante
+    const auraGeometry = new THREE.SphereGeometry(2.3, 64, 64);
+    const auraMaterial = new THREE.MeshBasicMaterial({
+      color: 0x3399ff,
+      transparent: true,
+      opacity: 0.25
+    });
+    const aura = new THREE.Mesh(auraGeometry, auraMaterial);
+    scene.add(aura);
+
+    // Luz ambiente e direcional
+    const ambientLight = new THREE.AmbientLight(0x555555);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
+
+    camera.position.z = 8;
+
+    // Movimento suave da câmera
+    let angle = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+
+      sphere.rotation.y += 0.002;
+      aura.rotation.y += 0.002;
+
+      // Pulsação da aura
+      const scale = 1 + Math.sin(Date.now() * 0.002) * 0.05;
+      aura.scale.set(scale, scale, scale);
+
+      angle += 0.0005;
+      camera.position.x = Math.sin(angle) * 10;
+      camera.position.z = Math.cos(angle) * 10;
+      camera.lookAt(scene.position);
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
